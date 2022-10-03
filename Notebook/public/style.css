@@ -1,0 +1,104 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#mainDiv{
+    display: flex;
+
+}
+
+#categoriesDiv{
+    background-color: rgb(225, 223, 220);
+    height: 70vh;
+    width: 20vw;
+}
+
+.category{
+    margin-top: 10px;
+    background-color: rosybrown;
+    width: 100%;
+    height: 4rem;
+    cursor: pointer;
+    position: relative;
+}
+
+.selectedCategory {
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    right: 0;
+    background: chartreuse;
+}
+
+.deleteCatButton {
+    position: absolute;
+    right: 20px;
+    height: 100%;
+    width: 50px;
+    background-color: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.categoryTitle{
+    pointer-events: none;
+
+}
+
+#newNoteDiv{
+    display: flex;
+    flex-direction: column;
+    background-color: mistyrose;
+    height: 30vh;
+    align-items: center;
+}
+
+#writeNoteButton {
+
+}
+
+#notesDiv{
+    flex-wrap: wrap;
+    background-color: rgb(157, 195, 229);
+    height: 70vh;
+    width: 80vw;
+    display:flex;
+}
+
+.note{
+    background-color: yellow;
+    height: 200px;
+    width: 200px;
+    text-align: center;
+    border: 2px black;
+    margin: 10px;
+    position: relative;
+}
+
+.deleteNoteButton {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+    border: none;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    color: gray;
+    cursor: pointer;
+
+}
+
+
+.notesCount{
+    pointer-events: none;
+
+}
+
+.fa {
+    pointer-events: none;
+}
+
+
