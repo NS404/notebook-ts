@@ -1,85 +1,101 @@
 import {Category} from "./Category";
 import {Note} from "./Note";
 
-let notes1: Note[] = [new Note('title49','content1','cat1'), new Note('title2','content2','cat1')];
-let notes2: Note[] = [new Note('title3','content3','cat2'), new Note('title4','content4','cat2')];
-let notes3: Note[] = [new Note('title1','content1','cat3'), new Note('title2','content2','cat3')];
-let cats: Category[] = [new Category('cat1', notes1),new Category('cat2',notes2)];
-
-
-
 let notesDiv = document.getElementById('notesDiv') as Element;
 let catDiv = document.getElementById('categoriesDiv') as Element;
 
 let writeNoteButton = document.getElementById('writeNoteButton') as HTMLButtonElement;
-writeNoteButton.addEventListener('click', writeNote);
+writeNoteButton.addEventListener('click', createNote);
 
 let newCategoryButton = document.getElementById('newCategoryButton') as HTMLButtonElement;
 newCategoryButton.addEventListener('click', createCategory);
 
+let openNewNoteButton = document.getElementById('openNewNoteButton') as HTMLButtonElement;
+openNewNoteButton.addEventListener('click', openNewNotePopup);
 
+let closeNewNoteButton = document.getElementById('closeNewNoteButton') as HTMLButtonElement;
+closeNewNoteButton.addEventListener('click',closeNewNotePopup);
 
+let newNotePopup = document.getElementById('newNoteDiv') as HTMLElement;
+let overlay = document.getElementById('overlay') as HTMLElement;
 
+function openNewNotePopup() {
+    newNotePopup.classList.add('active');
+    overlay.classList.add('active');
 
+}
 
-
-
-function deleteNote(event: Event) {
-    const item = event.target as HTMLElement;
-
-        if(item.classList[0] === 'deleteNoteButton') {
-            const note = item.parentElement as Element;
-            note.remove();
-        }
+function closeNewNotePopup() {
+    newNotePopup.classList.remove('active');
+    overlay.classList.remove('active');
 }
 
 
-
+let categories: Category[] = getCategories();
 let selectedCategory: Category;
 
-
-console.log(localStorage.length);
-
-let categories: Category[] = getCategories();
-
 renderCategories(categories);
-renderNotes(categories[0]);
+selectCategory(categories[0]);
+// @ts-ignore
+renderNotes(selectedCategory);
 
 
-function writeNote(e: Event) {
+function createNote() {
 
-    let newNoteTitle: string = (document.getElementById('newNoteTitle')as HTMLInputElement).value;
-    (document.getElementById('newNoteTitle')as HTMLInputElement).value = '';
-    let newNoteContent: string = (document.getElementById('noteContentArea')as HTMLInputElement).value;
-    (document.getElementById('noteContentArea')as HTMLInputElement).value = '';
-    let newNote = new Note(newNoteTitle, newNoteContent, selectedCategory.name);
+    if(selectedCategory !== undefined) {
 
-    saveNote(newNote);
+        let noteTitleInput = document.getElementById('newNoteTitle') as HTMLInputElement
+        let noteContentInput = document.getElementById('noteContentArea') as HTMLInputElement
+
+        if (noteTitleInput.value.trim().length  && noteContentInput.value.trim().length) {
+
+            let newNoteTitle: string = (document.getElementById('newNoteTitle') as HTMLInputElement).value;
+            (document.getElementById('newNoteTitle') as HTMLInputElement).value = '';
+            let newNoteContent: string = (document.getElementById('noteContentArea') as HTMLInputElement).value;
+            (document.getElementById('noteContentArea') as HTMLInputElement).value = '';
+            let newNote = new Note(newNoteTitle, newNoteContent, selectedCategory.name);
+
+            saveNote(newNote);
+        }
+    }
 }
 
 function createCategory() {
     let catNameInput = document.getElementById('newCategoryName')as HTMLInputElement;
     let categoryName: string = catNameInput.value;
-    catNameInput.value = '';
 
-    let notes: Note[] = [];
+    if(categoryName.trim().length) {
 
-    let newCategory: Category = new Category(categoryName,notes);
+        catNameInput.value = '';
 
-    selectedCategory = newCategory;
+        let notes: Note[] = [];
 
-    saveCategory(newCategory);
+        let newCategory: Category = new Category(categoryName, notes);
+
+        selectedCategory = newCategory;
+
+        saveCategory(newCategory);
+
+        selectCategory(newCategory);
+    }
 
 }
 
-function updateCategory(category: Category) {
-    categories.forEach(cat => {
-        if(cat.name == category.name){
-            cat = category;
-        }
-        localStorage.setItem('categories',JSON.stringify(categories));
+function updateNoteCount(category: Category) {
 
-    });
+    let catElms = catDiv.children;
+
+    for (let i = 0; i < catElms.length; i++) {
+
+        let categoryName  = (catElms[i].querySelector('.categoryName') as HTMLElement).innerText;
+
+        if(category.name === categoryName) {
+
+            (catElms[i].querySelector('.noteCount') as HTMLElement).innerText = String(category.notes.length);
+
+        }
+    }
+
 }
 
 function saveCategory(category: Category) {
@@ -87,6 +103,18 @@ function saveCategory(category: Category) {
     categories.push(category);
     localStorage.setItem('categories',JSON.stringify(categories));
     reRenderCategories();
+    reRenderNotes(selectedCategory);
+
+}
+
+function saveNote(newNote: Note) {
+
+    selectedCategory.notes.push(newNote);
+
+    localStorage.setItem('categories',JSON.stringify(categories));
+
+    updateNoteCount(selectedCategory);
+
     reRenderNotes(selectedCategory);
 
 }
@@ -110,16 +138,16 @@ function renderCategories(categories: Category[]){
         let categoryDiv = document.createElement('div');
         categoryDiv.classList.add('category');
 
-        let categoryTitle = document.createElement('h3');
-        categoryTitle.classList.add('categoryTitle');
-        categoryTitle.innerText = cat.name;
+        let categoryName = document.createElement('h3');
+        categoryName.classList.add('categoryName');
+        categoryName.innerText = cat.name;
 
         let notesCount = document.createElement('p');
-        notesCount.classList.add('notesCount');
+        notesCount.classList.add('noteCount');
         notesCount.innerText = String(cat.notes.length);
 
         let selectedIndicatorDiv = document.createElement('div');
-        selectedIndicatorDiv.classList.add('selectedCategory');
+        selectedIndicatorDiv.classList.add('selectedIndicator');
 
         let deleteCatButton = document.createElement('button');
         deleteCatButton.classList.add('deleteCatButton');
@@ -128,7 +156,7 @@ function renderCategories(categories: Category[]){
 
         categoryDiv.appendChild(selectedIndicatorDiv);
         categoryDiv.appendChild(deleteCatButton);
-        categoryDiv.appendChild(categoryTitle);
+        categoryDiv.appendChild(categoryName);
         categoryDiv.appendChild(notesCount);
         catDiv.appendChild(categoryDiv);
 
@@ -136,48 +164,42 @@ function renderCategories(categories: Category[]){
 
     });
 
-}
 
-function reRenderCategories(){
-    catDiv.innerHTML = '';
-    renderCategories(categories);
-}
 
-function reRenderNotes(cat: Category){
-    notesDiv.innerHTML = '';
-    renderNotes(cat);
 }
 
 function renderNotes(category: Category) {
 
-    let notes = category.notes;
+    if(category !== undefined) {
+        let notes = category.notes;
 
-    notes.forEach(note => {
+        notes.forEach(note => {
 
-        let noteDiv = document.createElement('div');
-        noteDiv.classList.add('note');
+            let noteDiv = document.createElement('div');
+            noteDiv.classList.add('note');
 
-        let noteTitle = document.createElement('h3');
-        noteTitle.classList.add('noteTitle');
-        noteTitle.innerText = note.title;
+            let noteTitle = document.createElement('h3');
+            noteTitle.classList.add('noteTitle');
+            noteTitle.innerText = note.title;
 
-        let noteContent = document.createElement('p');
-        noteContent.classList.add('noteContent');
-        noteContent.innerText = note.content;
+            let noteContent = document.createElement('p');
+            noteContent.classList.add('noteContent');
+            noteContent.innerText = note.content;
 
-        let deleteNoteButton = document.createElement('button');
-        deleteNoteButton.classList.add('deleteNoteButton');
-        deleteNoteButton.innerHTML = '<i class="fa fa-light fa-trash"></i>'
-        deleteNoteButton.addEventListener('click',deleteNote);
-
-
-        noteDiv.appendChild(noteTitle);
-        noteDiv.appendChild(noteContent);
-        noteDiv.appendChild(deleteNoteButton);
-        notesDiv.appendChild(noteDiv);
+            let deleteNoteButton = document.createElement('button');
+            deleteNoteButton.classList.add('deleteNoteButton');
+            deleteNoteButton.innerHTML = '<i class="fa fa-light fa-trash"></i>'
+            deleteNoteButton.addEventListener('click', deleteNote);
 
 
-    });
+            noteDiv.appendChild(noteTitle);
+            noteDiv.appendChild(noteContent);
+            noteDiv.appendChild(deleteNoteButton);
+            notesDiv.appendChild(noteDiv);
+
+
+        });
+    }
 
 }
 
@@ -185,44 +207,126 @@ function clickCategory(e: Event){
 
     let clickedCategory = e.target as Element;
 
-    let categoryTitle = clickedCategory.querySelector('.categoryTitle') as HTMLElement;
-
-    let categoryName: string = categoryTitle.innerText;
+    let categoryName = (clickedCategory.querySelector('.categoryName') as HTMLElement).innerText;
 
     categories.forEach(cat => {
         if(categoryName == cat.name){
-            console.log(cat.name)
             selectedCategory = cat;
-
         }
 
     });
-
+    toggleCategories(clickedCategory);
     reRenderNotes(selectedCategory);
 }
 
-function saveNote(newNote: Note) {
+function toggleCategories(categoryElm: Element){
 
-    selectedCategory.notes.push(newNote);
+    let categories = catDiv.children;
 
-    updateCategory(selectedCategory);
+    for (let i = 0; i < categories.length; i++) {
+        if(categoryElm === categories[i]) {
 
-    reRenderNotes(selectedCategory);
-    reRenderCategories();
+            categories[i].classList.add('selectedCategory');
+        }else {
+            categories[i].classList.remove('selectedCategory');
+        }
+    }
 
 
 }
 
 function deleteCategory(event: Event) {
-    const item = event.target as HTMLElement;
+
+    const item = event.target as Element;
 
     if(item.classList[0] === 'deleteCatButton') {
-        const category = item.parentElement as HTMLElement;
-        // @ts-ignore
-        let categoryTitle: string = category.querySelector('.categoryTitle').innerText;
+
+        let category = item.parentElement as HTMLElement;
+        let categoryName: string = (category.querySelector('.categoryName') as HTMLElement).innerText;
         category.remove();
+
+
+
+        categories.forEach(cat => {
+            if(cat.name === categoryName){
+                categories.splice(categories.indexOf(cat),1);
+            }
+        });
+
+        localStorage.setItem('categories',JSON.stringify(categories));
+
+        if(selectedCategory.name === categoryName) {
+
+
+            deSelectedCategory();
+
+        }
+
+        reRenderNotes(selectedCategory);
 
     }
 
 
 }
+
+function deleteNote(event: Event) {
+    const item = event.target as Element;
+
+    if(item.classList[0] === 'deleteNoteButton') {
+        const note = item.parentElement as HTMLElement;
+        let noteTitle: string = (note.querySelector('.noteTitle') as HTMLElement).innerText;
+
+        let notes = selectedCategory.notes;
+
+        notes.forEach(note => {
+            if(noteTitle == note.title) {
+                notes.splice(notes.indexOf(note),1);
+            }
+        });
+        localStorage.setItem('categories', JSON.stringify(categories));
+        updateNoteCount(selectedCategory);
+        reRenderNotes(selectedCategory);
+
+    }
+}
+
+function deSelectedCategory(){
+    // @ts-ignore
+    selectedCategory = undefined;
+
+    let categories = catDiv.children;
+
+    for (let i = 0; i < categories.length; i++) {
+            categories[i].classList.remove('selectedCategory');
+
+    }
+
+}
+
+function selectCategory(category: Category) {
+
+    selectedCategory = category;
+
+    let catElms = catDiv.children;
+
+    for (let i = 0; i < catElms.length; i++) {
+        let catTitle = (catElms[i].querySelector('.categoryName') as HTMLElement).innerText;
+
+        if(catTitle === category.name) {
+            toggleCategories(catElms[i]);
+        }
+    }
+
+}
+
+function reRenderNotes(cat: Category){
+    notesDiv.innerHTML = '';
+    renderNotes(cat);
+}
+
+function reRenderCategories(){
+    catDiv.innerHTML = '';
+    renderCategories(categories);
+}
+
+

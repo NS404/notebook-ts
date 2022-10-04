@@ -15,33 +15,43 @@
 
   <div id="leftSideDiv">
     <div id="notesDiv"></div>
-
-    <div id="newNoteDiv">
-      <input placeholder="Title" id="newNoteTitle" type="text">
-      <textarea placeholder="Note" name="noteContentArea" id="noteContentArea" cols="30" rows="10"></textarea>
-      <button id="writeNoteButton">Note</button>
+    <div class="buttonBar">
+      <button class="openNewNoteButton" id="openNewNoteButton">
+        <i class="fa fa-solid fa-circle-plus"></i>
+      </button>
     </div>
 
   </div>
 
   <div id="rightSideDiv">
     <div id="categoriesDiv">
-      <h2>Note Categories</h2>
 
     </div>
 
-    <div id="newCategoryDiv">
-      <input placeholder="New Category" id="newCategoryName" type="text">
-      <button id="newCategoryButton">Create</button>
-
+    <div class="newCategoryDiv">
+      <div class="newCategoryInputs" >
+        <input placeholder="New Category" id="newCategoryName" type="text">
+        <button id="newCategoryButton">Create</button>
+      </div>
     </div>
-
   </div>
 
 
 </div>
+<div class="newNoteDiv" id="newNoteDiv">
 
+  <div class="newNoteHeader">
+    <div class="title">New Note</div>
+    <button class="close-button" id="closeNewNoteButton">&times;</button>
+  </div>
+  <div class="newNoteBody">
+    <input placeholder="Title" id="newNoteTitle" type="text">
+    <textarea placeholder="Note" name="noteContentArea" id="noteContentArea" cols="30" rows="10"></textarea>
+    <button id="writeNoteButton">Note</button>
+  </div>
+</div>
 
+<div id="overlay"></div>
 
 
 <script src="https://unpkg.com/systemjs@6.11.0/dist/s.js"></script>
